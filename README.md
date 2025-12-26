@@ -1,52 +1,145 @@
-# AeroPulse
+# AeroPulse  
+
+### An Interpretability-First Analysis of Airline Experience Drivers
+
+---
+
+## Overview
+
+**AeroPulse** is an exploratory analysis of approximately **5,000 airline customer reviews**, designed to answer a single, sharply defined question:
+
+> **When customers express sentiment about a specific aspect of their airline experience, how strongly is that sentiment associated with their overall satisfaction?**
+
+The core insight is deliberately counter-intuitive:
+
+> **The aspects customers talk about most are not necessarily the aspects that matter most.**
+
+This project separates **frequency** (visibility) from **influence** (impact), and focuses on the latter.
+
+---
 
 ## What This Project Is
 
-AeroPulse is an exploratory analysis of ~5,000 airline customer reviews designed to answer a single, precise question:
+AeroPulse is an **influence analysis**, not a predictive system.
 
-> **When customers mention a specific aspect of their experience, how much does that sentiment actually influence their overall satisfaction?**
+It is intentionally scoped to:
+- prioritize interpretability over automation  
+- ground text analysis in observable rating behavior  
+- surface *high-leverage experience dimensions* without black-box models  
 
-The insight: **the most talked-about issues are not always the most impactful ones.**
+The work is exploratory and explanatory by design, closer in spirit to an applied research notebook than a production ML pipeline.
 
-### Why This Matters
+---
 
-Airlines receive massive volumes of feedback. Conventional analysis defaults to "people complain about X, so fix X." This project challenges that logic by separating **frequency** (how often something is discussed) from **influence** (how much it actually matters).
+## What This Project Is *Not*
 
-The result: actionable, defensible priorities grounded in data, not intuition.
+To avoid over-claiming or false rigor, AeroPulse explicitly does **not**:
+
+- Claim causality  
+- Build satisfaction or churn prediction models  
+- Auto-discover aspects using embeddings or topic models  
+- Optimize metrics such as accuracy or AUC  
+- Generalize findings beyond the analyzed airline  
+
+All conclusions are framed as **observed associations**, not causal effects.
+
+---
+
+## Dataset
+
+The analysis uses ~5,100 customer reviews scraped from `airlinequality.com` for **United Airlines**.  
+Each review includes:
+
+- Free-text narrative feedback  
+- Aspect-level ratings:
+  - Seat comfort  
+  - Cabin staff  
+  - Food & beverage  
+  - Ground service  
+  - Value for money  
+- An overall satisfaction score  
+- A binary recommendation flag  
+
+### Known Biases (Explicitly Acknowledged)
+
+This dataset is **not representative of the full passenger population**.  
+Key biases include:
+
+- Self-selection bias  
+- Negativity bias  
+- Non-uniform aspect rating completion  
+
+Rather than attempting to “correct” these biases, the analysis treats them as part of the signal and focuses on **relative influence**, not absolute satisfaction levels.
+
+---
+
+## Methodological Principles
+
+Several design choices are central to the validity of the analysis:
+
+### 1. Aspect Anchoring
+All text analysis is explicitly anchored to the airline’s **existing rating dimensions**.  
+No additional aspects are introduced, even if mentioned in text.
+
+This preserves alignment between:
+- what customers say  
+- what customers score  
+- what conclusions are drawn  
+
+### 2. Interpretation of Missing Ratings
+Missing aspect ratings are treated as **non-salience**, not neutrality.
+
+- No rating imputation is performed  
+- Aspect sentiment is computed **only when the aspect is explicitly mentioned in text**  
+
+All influence estimates are therefore **conditional on aspect mention** and should be interpreted as *within-aspect contrasts*, not population-wide effects.
+
+### 3. Sentiment Extraction
+Sentiment is computed using **rule-based VADER**, applied at the **sentence level** and restricted to **aspect-relevant sentences only**.
+
+This avoids:
+- sentiment dilution across unrelated topics  
+- hallucinated signal  
+- opaque model behavior  
+
+### 4. Influence Measurement
+Influence is measured using **directional lift**:
+
+> the change in mean overall satisfaction when aspect sentiment shifts from negative to positive
+
+Spearman correlation is reported only as supporting evidence, not as the primary signal.
 
 ---
 
 ## Key Findings
 
-* **Food & beverage quality** is discussed rarely but drives disproportionate satisfaction gains
-* **Cabin staff** acts as an emotional amplifier—critical for experience consistency
-* **Seat comfort** functions as a baseline requirement, not a differentiator
-* **Value for money** reflects overall judgment, not a direct operational lever
+A consistent hierarchy of influence emerges:
+
+- **Food & beverage quality** is discussed relatively infrequently, yet exhibits the **largest marginal impact** on overall satisfaction  
+- **Cabin staff behavior** acts as an emotional amplifier, contributing to polarized experiences  
+- **Seat comfort** functions as a baseline requirement, where failures are heavily penalized  
+- **Value for money** reflects retrospective judgment rather than a directly actionable operational lever  
+
+Some dimensions operate as **“silent killers”**—low visibility, high impact.
 
 ---
 
-## What This Project Does (and Doesn't)
+## Repository Structure
 
-✅ **Does:**
-* Identify high-leverage experience dimensions
-* Use interpretable, rating-anchored analysis
-* Ground conclusions in actual customer scores
-
-❌ **Does Not:**
-* Claim causality
-* Build prediction models
-* Auto-discover aspects
-* Generalize across airlines
+- `notebook/` — Primary narrative artifact (analysis + explanation)  
+- `src/` — Scrapping script 
+- `data/` — Pre-processed review dataset  
+- `assets/` — Supporting visuals  
 
 ---
 
-## Approach
+## Limitations and Extensions
 
-**Sentiment Extraction:** Rule-based VADER applied only to aspect-specific sentences (not whole reviews)
+This analysis does not claim causality and does not generalize beyond the studied airline.
 
-**Influence Measurement:** Directional lift—how much overall satisfaction improves when sentiment about an aspect shifts from negative to positive
+Potential extensions include:
+- Temporal trend analysis  
+- Cross-airline comparison  
+- Controlled embedding-based aspect discovery  
 
-**Aspect Anchoring:** Analysis restricted to five airline-defined dimensions (seat comfort, cabin staff, food & beverage, ground service, value for money)
-
-This restraint preserves clarity over complexity.
-
+Any extension should preserve the interpretability constraints used here.
